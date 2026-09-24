@@ -20,7 +20,26 @@ export const i18nDict: Record<string, { zh: string; en: string }> = {
   'nav.fullscreen': { zh: '全屏', en: 'FULLSCREEN' },
   'nav.exit_fullscreen': { zh: '退出', en: 'EXIT' },
   'nav.hint': { zh: '或将鼠标滑到左侧打开侧边栏', en: 'OR HOVER LEFT TO OPEN SIDEBAR' },
-  'nav.lang_toggle': { zh: '中/EN', en: '中/EN' }
+  'nav.lang_toggle': { zh: '中/EN', en: '中/EN' },
+  // Parking monitor mode
+  'monitor.title': { zh: '停车场监控', en: 'PARKING MONITOR' },
+  'monitor.total': { zh: '共 {count} 个停车场', en: '{count} parking lots' },
+  'monitor.severity.ok': { zh: '正常', en: 'OK' },
+  'monitor.severity.warning': { zh: '注意', en: 'Warning' },
+  'monitor.severity.major': { zh: '严重', en: 'Major' },
+  'monitor.severity.critical': { zh: '紧急', en: 'Critical' },
+  'monitor.updated': { zh: '更新时间', en: 'Updated' },
+  'monitor.never': { zh: '尚未获取数据', en: 'No data yet' },
+  'monitor.source': { zh: '数据源', en: 'Source' },
+  'monitor.error': { zh: '获取失败', en: 'Fetch failed' },
+  'monitor.empty': { zh: '没有停车场数据', en: 'No parking lot data' },
+  'monitor.refresh': { zh: '刷新', en: 'REFRESH' },
+  'monitor.exit': { zh: '返回可视化', en: 'Back to visualizer' },
+  'monitor.hint': { zh: '悬停方块显示名称信标，点击信标查看详情', en: 'Hover a block for its beacon, click the beacon for details' },
+  'monitor.detail.id': { zh: '编号', en: 'ID' },
+  'monitor.detail.updated': { zh: '上报时间', en: 'Reported' },
+  'monitor.detail.noMessage': { zh: '暂无说明', en: 'No details reported' },
+  'monitor.detail.close': { zh: '关闭', en: 'Close' },
 };
 
 let currentLang: Language = (localStorage.getItem('app_language') as Language) || 'zh';

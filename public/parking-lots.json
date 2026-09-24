@@ -1,0 +1,16 @@
+{
+  "lots": [
+    { "id": "P01", "name": "东门停车场", "severity": "ok", "updatedAt": "2026-09-24T08:00:00+08:00" },
+    { "id": "P02", "name": "西门停车场", "severity": "ok", "updatedAt": "2026-09-24T08:00:00+08:00" },
+    { "id": "P03", "name": "南广场地下车库", "severity": "warning", "message": "3 号闸机响应缓慢", "updatedAt": "2026-09-24T08:00:00+08:00" },
+    { "id": "P04", "name": "北区立体车库", "severity": "ok", "updatedAt": "2026-09-24T08:00:00+08:00" },
+    { "id": "P05", "name": "行政楼停车场", "severity": "major", "message": "车位检测器离线 12 个", "updatedAt": "2026-09-24T07:58:00+08:00" },
+    { "id": "P06", "name": "体育馆停车场", "severity": "ok", "updatedAt": "2026-09-24T08:00:00+08:00" },
+    { "id": "P07", "name": "医院停车场", "severity": "critical", "message": "出口道闸故障，车辆无法离场", "updatedAt": "2026-09-24T07:55:00+08:00" },
+    { "id": "P08", "name": "商业街停车场", "severity": "ok", "updatedAt": "2026-09-24T08:00:00+08:00" },
+    { "id": "P09", "name": "火车站南停车场", "severity": "warning", "message": "剩余车位不足 5%", "updatedAt": "2026-09-24T08:00:00+08:00" },
+    { "id": "P10", "name": "火车站北停车场", "severity": "ok", "updatedAt": "2026-09-24T08:00:00+08:00" },
+    { "id": "P11", "name": "科技园停车场", "severity": "ok", "updatedAt": "2026-09-24T08:00:00+08:00" },
+    { "id": "P12", "name": "图书馆停车场", "severity": "major", "message": "支付服务连接超时", "updatedAt": "2026-09-24T07:59:00+08:00" }
+  ]
+}

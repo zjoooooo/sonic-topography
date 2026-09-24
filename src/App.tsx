@@ -27,6 +27,11 @@ import {
   type ThemeRotationSettings,
 } from './lib/themes';
 import { readLyricsSettingsStorage, writeLyricsSettingsStorage, type LyricsSettings } from './lib/lyricsSettings';
+import { resolveParkingMonitorConfig } from './lib/parkingMonitor';
+import { ParkingMonitorView } from './components/ParkingMonitor/ParkingMonitorView';
+
+// Monitor mode is chosen by the URL (?mode=monitor or #monitor) and fixed for the page's lifetime.
+const parkingMonitorConfig = resolveParkingMonitorConfig(window.location);
 
 function readInitialCustomThemeState() {
   const presets = readCustomThemeStorage();
@@ -143,6 +148,18 @@ export default function App() {
 
   // Convert THREE.Color to css strings
   const backdropColor = `#${resolvedTheme.uFogColor.getHexString()}`;
+
+  if (parkingMonitorConfig.enabled) {
+    return (
+      <ParkingMonitorView
+        config={parkingMonitorConfig}
+        themeColors={resolvedTheme}
+        rotationSpeed={sceneRotationSpeed}
+        terrainDensity={groundEqSettings.terrainDensity}
+        backdropColor={backdropColor}
+      />
+    );
+  }
 
   return (
     <div className="relative min-h-[100dvh] w-screen overflow-hidden text-[#94a3b8] font-sans selection:bg-blue-500/30 transition-colors duration-1000" style={{ backgroundColor: backdropColor }}>
