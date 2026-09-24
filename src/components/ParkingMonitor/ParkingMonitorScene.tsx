@@ -195,18 +195,26 @@ export function ParkingMonitorScene({
     const offset = (gridSize * spacing) / 2;
     const clearance = layout.lotSize / 2 + boxWidth / 2;
 
+    // Mark the ground cells covered by each lot footprint (index range per axis, not a full scan).
+    const hiddenCells = new Uint8Array(gridSize * gridSize);
+    const indexRange = (center: number) => [
+      Math.max(0, Math.ceil((center - clearance + offset) / spacing)),
+      Math.min(gridSize - 1, Math.floor((center + clearance + offset) / spacing)),
+    ];
+    for (const cell of layout.cells) {
+      const [x0, x1] = indexRange(cell.x);
+      const [z0, z1] = indexRange(cell.z);
+      for (let x = x0; x <= x1; x++) {
+        for (let z = z0; z <= z1; z++) hiddenCells[x * gridSize + z] = 1;
+      }
+    }
+
     let i = 0;
     for (let x = 0; x < gridSize; x++) {
       for (let z = 0; z < gridSize; z++) {
         const px = x * spacing - offset;
         const pz = z * spacing - offset;
-        let hidden = false;
-        for (const cell of layout.cells) {
-          if (Math.abs(cell.x - px) < clearance && Math.abs(cell.z - pz) < clearance) {
-            hidden = true;
-            break;
-          }
-        }
+        const hidden = hiddenCells[i] === 1;
         tempPosition.set(px, PARKING_GROUND_HEIGHT / 2, pz);
         tempScale.set(hidden ? 0 : 1, hidden ? 0 : PARKING_GROUND_HEIGHT, hidden ? 0 : 1);
         tempMatrix.compose(tempPosition, identityQuaternion, tempScale);

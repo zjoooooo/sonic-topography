@@ -3,8 +3,8 @@ import {
   DEFAULT_PARKING_POLL_SECONDS,
   DEFAULT_PARKING_SOURCE_URL,
   MIN_PARKING_POLL_SECONDS,
-  PARKING_GROUND_HEIGHT,
-  PARKING_RAISED_HEIGHT,
+  PARKING_ALARM_HEIGHT,
+  PARKING_OK_HEIGHT,
   PARKING_SEVERITIES,
   PARKING_SEVERITY_COLORS,
   buildVisualizerUrl,
@@ -39,16 +39,17 @@ assert.equal(normalizeParkingSeverity(false), 'critical');
 assert.equal(normalizeParkingSeverity('something-new'), 'warning');
 
 assert.deepEqual(PARKING_SEVERITIES, ['ok', 'warning', 'major', 'critical']);
-assert.equal(PARKING_SEVERITY_COLORS.ok, '#22d3ee');
+assert.equal(PARKING_SEVERITY_COLORS.ok, '#4ade80');
 assert.equal(PARKING_SEVERITY_COLORS.warning, '#facc15');
 assert.equal(PARKING_SEVERITY_COLORS.major, '#fb923c');
 assert.equal(PARKING_SEVERITY_COLORS.critical, '#ef4444');
 
-// --- heights: healthy is flush with the ground, every problem shares one raised height ---
-assert.equal(parkingLotTargetHeight('ok'), PARKING_GROUND_HEIGHT);
-assert.equal(parkingLotTargetHeight('warning'), PARKING_GROUND_HEIGHT + PARKING_RAISED_HEIGHT);
-assert.equal(parkingLotTargetHeight('major'), PARKING_GROUND_HEIGHT + PARKING_RAISED_HEIGHT);
-assert.equal(parkingLotTargetHeight('critical'), PARKING_GROUND_HEIGHT + PARKING_RAISED_HEIGHT);
+// --- heights: healthy is a low block at half the alarm height, every problem shares one alarm height ---
+assert.equal(PARKING_OK_HEIGHT, PARKING_ALARM_HEIGHT / 2);
+assert.equal(parkingLotTargetHeight('ok'), PARKING_OK_HEIGHT);
+assert.equal(parkingLotTargetHeight('warning'), PARKING_ALARM_HEIGHT);
+assert.equal(parkingLotTargetHeight('major'), PARKING_ALARM_HEIGHT);
+assert.equal(parkingLotTargetHeight('critical'), PARKING_ALARM_HEIGHT);
 
 // --- normalizeParkingLots ---
 assert.deepEqual(normalizeParkingLots(null), []);

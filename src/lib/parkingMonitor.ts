@@ -52,7 +52,7 @@ export const PARKING_SEVERITIES: ParkingSeverity[] = ['ok', 'warning', 'major', 
 
 /** Colours are plain sRGB hex so CSS and the block shader show the same tone. */
 export const PARKING_SEVERITY_COLORS: Record<ParkingSeverity, string> = {
-  ok: '#22d3ee',
+  ok: '#4ade80',
   warning: '#facc15',
   major: '#fb923c',
   critical: '#ef4444',
@@ -65,9 +65,13 @@ export const PARKING_SEVERITY_LEVEL: Record<ParkingSeverity, number> = {
   critical: 3,
 };
 
-/** Healthy lots sit flush with the ground; every problem lot rises to this same height. */
+/**
+ * Block heights (ground level is the top of the 1-unit ground cells).
+ * Every problem lot shares one alarm height; healthy lots are a low block at half that height.
+ */
 export const PARKING_GROUND_HEIGHT = 1;
-export const PARKING_RAISED_HEIGHT = 6;
+export const PARKING_ALARM_HEIGHT = 7;
+export const PARKING_OK_HEIGHT = PARKING_ALARM_HEIGHT / 2;
 /** Gap between the top of a block and its beacon label. */
 export const PARKING_BEACON_GAP = 3.2;
 
@@ -198,7 +202,7 @@ export function summarizeParkingLots(lots: ParkingLot[]): Record<ParkingSeverity
 }
 
 export function parkingLotTargetHeight(severity: ParkingSeverity): number {
-  return severity === 'ok' ? PARKING_GROUND_HEIGHT : PARKING_GROUND_HEIGHT + PARKING_RAISED_HEIGHT;
+  return severity === 'ok' ? PARKING_OK_HEIGHT : PARKING_ALARM_HEIGHT;
 }
 
 /**

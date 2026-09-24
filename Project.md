@@ -5,13 +5,14 @@ Every parking lot becomes one block on the 3D platter:
 
 | State | Height | Colour |
 | --- | --- | --- |
-| No problem | flush with the ground | cyan `#22d3ee` |
-| Warning | raised (fixed height) | yellow `#facc15` |
-| Major | raised (same fixed height) | orange `#fb923c` |
-| Critical | raised (same fixed height) | red `#ef4444` |
+| No problem | low block, half the alarm height | grass green `#4ade80` |
+| Warning | alarm height | yellow `#facc15` |
+| Major | alarm height | orange `#fb923c` |
+| Critical | alarm height | red `#ef4444` |
 
-All problem blocks rise to exactly the same height; only the colour tells the severity apart.
-The ground stays flat (no idle wave animation) so the raised blocks are the only relief.
+All problem blocks rise to exactly the same alarm height; only the colour tells the severity apart.
+Healthy lots are a low green block at exactly half that height, so the wall has two clean levels.
+The ground stays flat (no idle wave animation) so the blocks are the only relief.
 
 Hovering a block shows a beacon above it: a thin stem, a dot, and a label with the lot name
 floating a fixed distance above the block top. The label is a button; clicking it opens the
@@ -34,6 +35,14 @@ The following switches are recognised in the query string or the hash (`#mode=mo
 | `source=<url>` | `/parking-lots.json` | JSON endpoint to poll |
 | `interval=<seconds>` | `10` | polling period, minimum `2` |
 | `rotate=<radians per second>` | saved visualizer setting | platter rotation; `rotate=0` gives a still wall |
+
+A larger sample with 500 lots ships in `public/parking-lots-500.json`:
+
+```text
+http://127.0.0.1:3000/?mode=monitor&source=/parking-lots-500.json&rotate=0
+```
+
+Regenerate a sample of any size with `node scripts/gen-parking-lots.mjs <count> <output>`.
 
 Example with a real backend polled every 5 seconds:
 
@@ -98,8 +107,10 @@ If a poll fails, the last good list stays on screen and the error is shown in th
 | `src/components/ParkingMonitor/ParkingMonitorOverlay.tsx` | legend, counts, source/error line, detail card |
 | `src/components/ParkingMonitor/useParkingLots.ts` | polling hook |
 | `public/parking-lots.json` | sample data used by the default source URL |
+| `public/parking-lots-500.json` | 500-lot sample for load and layout checks |
+| `scripts/gen-parking-lots.mjs` | generator for sample files of any size |
 | `src/App.tsx` | switches to `ParkingMonitorView` when the URL enables monitor mode |
 
 Tunable constants live at the top of `src/lib/parkingMonitor.ts`:
-`PARKING_RAISED_HEIGHT` (how far problem blocks rise), `PARKING_BEACON_GAP` (label distance
+`PARKING_ALARM_HEIGHT` (problem block height; healthy blocks are half of it), `PARKING_BEACON_GAP` (label distance
 above the block), `DEFAULT_PARKING_LOT_SIZE` / `DEFAULT_PARKING_LOT_GAP` (block footprint and spacing).
