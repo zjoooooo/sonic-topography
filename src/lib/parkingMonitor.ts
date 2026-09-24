@@ -46,20 +46,18 @@ export interface ParkingMonitorConfig {
   intervalMs: number;
   /** Platter rotation override in radians per second; null keeps the visualizer's saved setting. */
   rotationSpeed: number | null;
+  /** Optional bloom post-processing (`fx=bloom`); off by default. */
+  bloom: boolean;
 }
 
 export const PARKING_SEVERITIES: ParkingSeverity[] = ['ok', 'warning', 'major', 'critical'];
 
-/**
- * Colours are plain sRGB hex so CSS and the block shader show the same tone.
- * The wall is a deep-blue field: healthy blocks are a quiet steel blue below the bloom threshold,
- * and alarms climb a warm, glowing ramp gold -> coral -> hot red. Alternatives are listed in Project.md.
- */
+/** Colours are plain sRGB hex so CSS and the block shader show the same tone. */
 export const PARKING_SEVERITY_COLORS: Record<ParkingSeverity, string> = {
-  ok: '#2b74d8',
-  warning: '#ffc857',
-  major: '#ff7a45',
-  critical: '#ff3355',
+  ok: '#22d3ee',
+  warning: '#facc15',
+  major: '#fb923c',
+  critical: '#ef4444',
 };
 
 export const PARKING_SEVERITY_LEVEL: Record<ParkingSeverity, number> = {
@@ -309,7 +307,8 @@ function readParam(params: URLSearchParams[], key: string): string | null {
 /**
  * Monitor mode is switched on by `?mode=monitor`, `#monitor`, `#/monitor` or `#mode=monitor`.
  * `source` overrides the JSON URL, `interval` the polling period in seconds,
- * `rotate` the platter rotation speed (radians per second, `0` for a still wall).
+ * `rotate` the platter rotation speed (radians per second, `0` for a still wall),
+ * `fx=bloom` switches on the optional glow post-processing.
  */
 export function resolveParkingMonitorConfig(location: { search?: string; hash?: string }): ParkingMonitorConfig {
   const search = new URLSearchParams(location.search ?? '');
@@ -330,7 +329,9 @@ export function resolveParkingMonitorConfig(location: { search?: string; hash?: 
   const rotateValue = rotateParam === null ? NaN : Number(rotateParam);
   const rotationSpeed = Number.isFinite(rotateValue) ? rotateValue : null;
 
-  return { enabled, sourceUrl, intervalMs, rotationSpeed };
+  const bloom = (readParam(bags, 'fx') ?? '').toLowerCase().split(',').includes('bloom');
+
+  return { enabled, sourceUrl, intervalMs, rotationSpeed, bloom };
 }
 
 /** URL of the same page without monitor-mode switches, used by the "back to visualizer" link. */
@@ -340,6 +341,7 @@ export function buildVisualizerUrl(location: { pathname?: string; search?: strin
   params.delete('source');
   params.delete('interval');
   params.delete('rotate');
+  params.delete('fx');
   const query = params.toString();
   return `${location.pathname ?? '/'}${query ? `?${query}` : ''}`;
 }

@@ -79,6 +79,7 @@ export function ParkingMonitorScene({
   rotationSpeed = 0,
   terrainDensity = DEFAULT_TERRAIN_DENSITY,
   selectedLotId = null,
+  bloom = false,
   onLotSelect,
 }: {
   lots: ParkingLot[];
@@ -86,6 +87,7 @@ export function ParkingMonitorScene({
   rotationSpeed?: number;
   terrainDensity?: number;
   selectedLotId?: string | null;
+  bloom?: boolean;
   onLotSelect?: (lot: ParkingLot) => void;
 }) {
   const { camera, gl } = useThree();
@@ -388,8 +390,8 @@ export function ParkingMonitorScene({
 
   return (
     <>
-      {/* The post-processing chain needs an opaque canvas; clearing to the fog colour matches the CSS backdrop. */}
-      <MonitorPostFX getClearColor={() => groundMatRef.current?.uFogColor ?? null} />
+      {/* Optional glow. The chain needs an opaque canvas; clearing to the fog colour matches the CSS backdrop. */}
+      {bloom && <MonitorPostFX getClearColor={() => groundMatRef.current?.uFogColor ?? null} />}
       <OrbitControls
         ref={controlsRef}
         makeDefault
@@ -414,7 +416,7 @@ export function ParkingMonitorScene({
             <instancedBufferAttribute attach="attributes-aIndex" args={[groundIndex, 1]} />
           </boxGeometry>
           {/* @ts-ignore */}
-          <monitorBlockShaderMaterial ref={groundMatRef} transparent={true} />
+          <monitorBlockShaderMaterial ref={groundMatRef} transparent={true} uLinearOutput={bloom ? 1 : 0} />
         </instancedMesh>
 
         {lotCount > 0 && (
@@ -433,7 +435,7 @@ export function ParkingMonitorScene({
               <instancedBufferAttribute attach="attributes-aIndex" args={[lotIndex, 1]} />
             </boxGeometry>
             {/* @ts-ignore */}
-            <monitorBlockShaderMaterial ref={lotMatRef} transparent={true} />
+            <monitorBlockShaderMaterial ref={lotMatRef} transparent={true} uLinearOutput={bloom ? 1 : 0} />
           </instancedMesh>
         )}
 

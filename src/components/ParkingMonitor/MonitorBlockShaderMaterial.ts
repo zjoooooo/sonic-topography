@@ -3,12 +3,13 @@ import { shaderMaterial } from '@react-three/drei';
 import { PARKING_SEVERITY_COLORS } from '../../lib/parkingMonitor';
 
 /**
- * The monitor renders through MonitorPostFX (bloom + sRGB output pass), so the shader works in
- * linear light: palette colours go through THREE's normal sRGB -> linear conversion here and the
- * output pass encodes them back, landing on screen exactly as the hex values say.
+ * Status colours are written to the framebuffer as-is (the shader has no colour-space
+ * conversion), so keep them in sRGB instead of letting THREE.Color convert to linear.
+ * With the optional bloom chain (uLinearOutput = 1) the finished colour is converted to linear at
+ * the very end and the output pass encodes it back, so the look stays identical either way.
  */
-export function paletteColor(hex: string): THREE.Color {
-  return new THREE.Color(hex);
+export function rawColor(hex: string): THREE.Color {
+  return new THREE.Color().setHex(parseInt(hex.replace('#', ''), 16), THREE.LinearSRGBColorSpace);
 }
 
 /**
@@ -22,13 +23,14 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
   {
     uTime: 0,
     uHoverIndex: -1,
+    uLinearOutput: 0,
     uBaseColor1: new THREE.Color(0.01, 0.02, 0.04),
     uBaseColor2: new THREE.Color(0.03, 0.05, 0.09),
     uFogColor: new THREE.Color(0.01, 0.02, 0.04),
-    uOkColor: paletteColor(PARKING_SEVERITY_COLORS.ok),
-    uWarningColor: paletteColor(PARKING_SEVERITY_COLORS.warning),
-    uMajorColor: paletteColor(PARKING_SEVERITY_COLORS.major),
-    uCriticalColor: paletteColor(PARKING_SEVERITY_COLORS.critical),
+    uOkColor: rawColor(PARKING_SEVERITY_COLORS.ok),
+    uWarningColor: rawColor(PARKING_SEVERITY_COLORS.warning),
+    uMajorColor: rawColor(PARKING_SEVERITY_COLORS.major),
+    uCriticalColor: rawColor(PARKING_SEVERITY_COLORS.critical),
   },
   // vertex shader
   `
@@ -39,7 +41,6 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
 
     varying vec2 vUv;
     varying vec3 vNormal;
-    varying vec3 vViewNormal;
     varying float vRelativeY;
     varying float vDistance;
     varying float vStatus;
@@ -48,8 +49,6 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
     void main() {
       vUv = uv;
       vNormal = normal;
-      // Instances only translate and scale, so the object normal matrix is enough for shading.
-      vViewNormal = normalize(normalMatrix * normal);
 
       vec4 instancePos = instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
       vDistance = length(instancePos.xz);
@@ -65,6 +64,7 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
   // fragment shader
   `
     uniform float uTime;
+    uniform float uLinearOutput;
     uniform vec3 uBaseColor1;
     uniform vec3 uBaseColor2;
     uniform vec3 uFogColor;
@@ -75,7 +75,6 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
 
     varying vec2 vUv;
     varying vec3 vNormal;
-    varying vec3 vViewNormal;
     varying float vRelativeY;
     varying float vDistance;
     varying float vStatus;
@@ -88,18 +87,9 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
       return uCriticalColor;
     }
 
-    // Theme colours arrive in linear space but the music terrain writes them raw, which is what gives
-    // its ground that deep, inky look. Squaring them once more reproduces that look after the output pass.
-    vec3 inky(vec3 c) {
-      return pow(max(c, vec3(0.0)), vec3(2.2));
-    }
-
     void main() {
       bool isTop = vNormal.y > 0.5;
       bool isGround = vStatus < -0.5;
-      vec3 base1 = inky(uBaseColor1);
-      vec3 base2 = inky(uBaseColor2);
-      vec3 fog = inky(uFogColor);
 
       float distFade = 1.0 - smoothstep(40.0, 75.0, vDistance);
 
@@ -111,55 +101,42 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
       vec3 finalColor;
 
       if (isGround) {
-        vec3 body = mix(base1, base2, vRelativeY * distFade);
+        vec3 body = mix(uBaseColor1, uBaseColor2, vRelativeY * distFade);
         if (isTop) {
-          vec3 lift = mix(base2, vec3(1.0), 0.02);
-          finalColor = mix(base2, lift, distFade);
-          finalColor += mix(base2, vec3(1.0), 0.05) * edge * 0.35 * distFade;
+          vec3 lift = mix(uBaseColor2, vec3(1.0), 0.05);
+          finalColor = mix(uBaseColor2, lift, distFade);
+          finalColor += mix(uBaseColor2, vec3(1.0), 0.14) * edge * 0.35 * distFade;
         } else {
           finalColor = body;
         }
       } else {
         vec3 c = statusColor(vStatus);
-        bool isOk = vStatus < 0.5;
-        bool isCritical = vStatus > 2.5;
-        // Healthy blocks stay under the bloom threshold; alarms sit above it and glow. Critical breathes.
-        // Orange and red are darker hues than gold, so they get an HDR boost to bloom about as strongly.
-        float pulse = isCritical ? 1.0 + 0.18 * sin(uTime * 3.5) : 1.0;
-        float alarmBoost = vStatus < 1.5 ? 0.85 : (vStatus < 2.5 ? 1.45 : 1.9);
-        float intensity = (isOk ? 0.6 : alarmBoost) * pulse;
-        // Dark glass body tinted by the status colour; the colour itself lives in the lit top and the edges.
-        vec3 body = mix(base2, c, isOk ? 0.12 : 0.2);
         if (isTop) {
-          float radial = smoothstep(0.0, 1.0, length(vUv - 0.5) * 1.6);
-          vec3 face = mix(c, mix(c, body, 0.5), radial);
-          finalColor = face * intensity;
-          finalColor += mix(c, vec3(1.0), 0.35) * edge * (isOk ? 0.5 : 0.9) * intensity;
+          finalColor = c;
+          finalColor += c * edge * 0.55;
         } else {
-          // Fixed key light in view space so the sides always show volume, whatever the platter angle.
-          vec3 lightDir = normalize(vec3(-0.45, 0.35, 0.82));
-          float faceLight = 0.6 + 0.4 * max(0.0, dot(normalize(vViewNormal), lightDir));
-          float vertical = mix(0.5, 1.0, smoothstep(0.0, 1.0, vRelativeY));
-          vec3 side = body * faceLight * vertical;
-          // Status colour returns as glowing vertical edges and a top rim, like the terrain pillars.
-          float verticalEdge = smoothstep(0.06, 0.0, vUv.x) + smoothstep(0.94, 1.0, vUv.x);
+          // Sides darken toward the base so raised blocks read as solid pillars.
+          float side = mix(0.22, 0.8, vRelativeY);
+          finalColor = mix(uBaseColor2, c, side);
           float rim = smoothstep(0.06, 0.0, 1.0 - vRelativeY);
-          side += c * (verticalEdge * (isOk ? 0.25 : 0.4) + rim * 0.8) * intensity;
-          // Sink the base into the ground colour so the block sits in the platter instead of floating on it.
-          side = mix(base2, side, smoothstep(0.0, 0.12, vRelativeY));
-          finalColor = side;
+          finalColor += c * rim * 0.5;
         }
-        finalColor = mix(finalColor, vec3(1.0), vHover * 0.2);
+        finalColor = mix(finalColor, vec3(1.0), vHover * 0.28);
       }
 
       // Aerial perspective toward the horizon; lots keep more of their colour than the ground.
       float aerialFog = smoothstep(30.0, 65.0, vDistance);
-      vec3 atmosphericColor = mix(base1, base2, 0.4);
+      vec3 atmosphericColor = mix(uBaseColor1, uBaseColor2, 0.4);
       finalColor = mix(finalColor, atmosphericColor, aerialFog * (isGround ? 0.35 : 0.15));
 
       float alphaFade = 1.0 - smoothstep(55.0, 78.0, vDistance);
       float alpha = isGround ? alphaFade : max(alphaFade, 0.92);
-      finalColor = mix(finalColor, fog, (1.0 - alphaFade) * (isGround ? 0.45 : 0.15));
+      finalColor = mix(finalColor, uFogColor, (1.0 - alphaFade) * (isGround ? 0.45 : 0.15));
+
+      // Optional post-processing renders to a linear HDR target that the output pass re-encodes.
+      if (uLinearOutput > 0.5) {
+        finalColor = pow(max(finalColor, vec3(0.0)), vec3(2.2));
+      }
 
       gl_FragColor = vec4(finalColor, alpha);
     }
@@ -169,6 +146,7 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
 export type MonitorBlockShaderMaterialInstance = THREE.ShaderMaterial & {
   uTime: number;
   uHoverIndex: number;
+  uLinearOutput: number;
   uBaseColor1: THREE.Color;
   uBaseColor2: THREE.Color;
   uFogColor: THREE.Color;

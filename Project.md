@@ -5,31 +5,22 @@ Every parking lot becomes one block on the 3D platter:
 
 | State | Height | Colour |
 | --- | --- | --- |
-| No problem | low block, half the alarm height | steel blue `#2b74d8`, kept dim |
-| Warning | alarm height | gold `#ffc857`, glowing |
-| Major | alarm height | coral `#ff7a45`, glowing |
-| Critical | alarm height | hot red `#ff3355`, glowing and slowly pulsing |
+| No problem | low block, half the alarm height | cyan `#22d3ee` |
+| Warning | alarm height | yellow `#facc15` |
+| Major | alarm height | orange `#fb923c` |
+| Critical | alarm height | red `#ef4444` |
 
 All problem blocks rise to exactly the same alarm height; only the colour tells the severity apart.
 Healthy lots are a low block at exactly half that height, so the wall has two clean levels.
 The ground stays flat (no idle wave animation) so the blocks are the only relief.
 
-### How the look is built
+Blocks are drawn flat and bright: a solid top face with a light rim, sides that darken toward the
+ground. To try another palette, swap the four hex values in `PARKING_SEVERITY_COLORS`
+(`src/lib/parkingMonitor.ts`); the legend, beacons and detail card follow automatically.
 
-The monitor renders through a small post-processing chain (`MonitorPostFX.tsx`: scene -> bloom ->
-sRGB output), so light is the thing that separates healthy from alarmed:
-
-- Blocks are dark glass: the body is the platter colour tinted by the status colour, and the colour
-  itself lives in the lit top face, the top rim and the vertical edges.
-- Healthy blocks are rendered at 60% intensity, which keeps them under the bloom threshold: a calm
-  blue field that never glows.
-- Alarm blocks sit above the threshold and bloom. Coral and red are darker hues than gold, so they
-  get an HDR boost so all three glow about equally. Critical blocks breathe (a slow brightness pulse).
-- Bloom strength / radius / threshold live in `MONITOR_BLOOM` in `MonitorPostFX.tsx`.
-
-To try another palette, swap the four hex values in `PARKING_SEVERITY_COLORS`
-(`src/lib/parkingMonitor.ts`); the legend, beacons and detail card follow automatically. Keep the
-`ok` colour fairly dark so it stays below the bloom threshold, and keep the alarm colours bright.
+An optional glow (`fx=bloom` in the URL) renders the scene through a small post-processing chain
+(`MonitorPostFX.tsx`: scene -> bloom -> sRGB output). It is off by default; its strength, radius and
+threshold live in `MONITOR_BLOOM`.
 
 ## Opening the monitor
 
@@ -47,6 +38,7 @@ The following switches are recognised in the query string or the hash (`#mode=mo
 | `source=<url>` | `/parking-lots.json` | JSON endpoint to poll |
 | `interval=<seconds>` | `10` | polling period, minimum `2` |
 | `rotate=<radians per second>` | saved visualizer setting | platter rotation; `rotate=0` gives a still wall |
+| `fx=bloom` | off | optional glow post-processing |
 
 A larger sample with 500 lots ships in `public/parking-lots-500.json`:
 

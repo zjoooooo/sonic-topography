@@ -39,10 +39,10 @@ assert.equal(normalizeParkingSeverity(false), 'critical');
 assert.equal(normalizeParkingSeverity('something-new'), 'warning');
 
 assert.deepEqual(PARKING_SEVERITIES, ['ok', 'warning', 'major', 'critical']);
-assert.equal(PARKING_SEVERITY_COLORS.ok, '#2b74d8');
-assert.equal(PARKING_SEVERITY_COLORS.warning, '#ffc857');
-assert.equal(PARKING_SEVERITY_COLORS.major, '#ff7a45');
-assert.equal(PARKING_SEVERITY_COLORS.critical, '#ff3355');
+assert.equal(PARKING_SEVERITY_COLORS.ok, '#22d3ee');
+assert.equal(PARKING_SEVERITY_COLORS.warning, '#facc15');
+assert.equal(PARKING_SEVERITY_COLORS.major, '#fb923c');
+assert.equal(PARKING_SEVERITY_COLORS.critical, '#ef4444');
 
 // --- heights: healthy is a low block at half the alarm height, every problem shares one alarm height ---
 assert.equal(PARKING_OK_HEIGHT, PARKING_ALARM_HEIGHT / 2);
@@ -138,7 +138,11 @@ assert.deepEqual(resolveParkingMonitorConfig({ search: '', hash: '' }), {
   sourceUrl: DEFAULT_PARKING_SOURCE_URL,
   intervalMs: DEFAULT_PARKING_POLL_SECONDS * 1000,
   rotationSpeed: null,
+  bloom: false,
 });
+assert.equal(resolveParkingMonitorConfig({ search: '?mode=monitor&fx=bloom' }).bloom, true);
+assert.equal(resolveParkingMonitorConfig({ hash: '#mode=monitor&fx=BLOOM' }).bloom, true);
+assert.equal(resolveParkingMonitorConfig({ search: '?mode=monitor&fx=none' }).bloom, false);
 assert.equal(resolveParkingMonitorConfig({ search: '?mode=monitor&rotate=0' }).rotationSpeed, 0);
 assert.equal(resolveParkingMonitorConfig({ search: '?mode=monitor&rotate=0.05' }).rotationSpeed, 0.05);
 assert.equal(resolveParkingMonitorConfig({ search: '?mode=monitor&rotate=fast' }).rotationSpeed, null);
@@ -155,7 +159,7 @@ assert.equal(custom.sourceUrl, 'http://10.0.0.5:8000/api/lots');
 assert.equal(custom.intervalMs, MIN_PARKING_POLL_SECONDS * 1000);
 assert.equal(resolveParkingMonitorConfig({ search: '?interval=abc' }).intervalMs, DEFAULT_PARKING_POLL_SECONDS * 1000);
 
-assert.equal(buildVisualizerUrl({ pathname: '/', search: '?mode=monitor&source=x&interval=3&rotate=0', hash: '#monitor' }), '/');
+assert.equal(buildVisualizerUrl({ pathname: '/', search: '?mode=monitor&source=x&interval=3&rotate=0&fx=bloom', hash: '#monitor' }), '/');
 assert.equal(buildVisualizerUrl({ pathname: '/app', search: '?mode=monitor&lang=zh' }), '/app?lang=zh');
 
 console.log('parkingMonitor tests passed');

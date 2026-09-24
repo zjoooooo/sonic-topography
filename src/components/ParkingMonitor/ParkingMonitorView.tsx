@@ -39,6 +39,7 @@ export function ParkingMonitorView({
             rotationSpeed={config.rotationSpeed ?? rotationSpeed}
             terrainDensity={terrainDensity}
             selectedLotId={selectedLotId}
+            bloom={config.bloom}
             onLotSelect={(lot) => setSelectedLotId(lot.id)}
           />
         </Canvas>
