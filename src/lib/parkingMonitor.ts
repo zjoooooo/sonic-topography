@@ -52,10 +52,10 @@ export const PARKING_SEVERITIES: ParkingSeverity[] = ['ok', 'warning', 'major', 
 
 /** Colours are plain sRGB hex so CSS and the block shader show the same tone. */
 export const PARKING_SEVERITY_COLORS: Record<ParkingSeverity, string> = {
-  ok: '#4ade80',
-  warning: '#facc15',
-  major: '#fb923c',
-  critical: '#ef4444',
+  ok: '#52c95b',
+  warning: '#ffd43b',
+  major: '#ff8c2e',
+  critical: '#ff3c41',
 };
 
 export const PARKING_SEVERITY_LEVEL: Record<ParkingSeverity, number> = {

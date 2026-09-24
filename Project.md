@@ -5,10 +5,10 @@ Every parking lot becomes one block on the 3D platter:
 
 | State | Height | Colour |
 | --- | --- | --- |
-| No problem | low block, half the alarm height | grass green `#4ade80` |
-| Warning | alarm height | yellow `#facc15` |
-| Major | alarm height | orange `#fb923c` |
-| Critical | alarm height | red `#ef4444` |
+| No problem | low block, half the alarm height | grass green `#52c95b` |
+| Warning | alarm height | yellow `#ffd43b` |
+| Major | alarm height | orange `#ff8c2e` |
+| Critical | alarm height | red `#ff3c41` |
 
 All problem blocks rise to exactly the same alarm height; only the colour tells the severity apart.
 Healthy lots are a low green block at exactly half that height, so the wall has two clean levels.

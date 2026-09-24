@@ -38,6 +38,7 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
 
     varying vec2 vUv;
     varying vec3 vNormal;
+    varying vec3 vViewNormal;
     varying float vRelativeY;
     varying float vDistance;
     varying float vStatus;
@@ -46,6 +47,8 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
     void main() {
       vUv = uv;
       vNormal = normal;
+      // Instances only translate and scale, so the object normal matrix is enough for shading.
+      vViewNormal = normalize(normalMatrix * normal);
 
       vec4 instancePos = instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
       vDistance = length(instancePos.xz);
@@ -71,6 +74,7 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
 
     varying vec2 vUv;
     varying vec3 vNormal;
+    varying vec3 vViewNormal;
     varying float vRelativeY;
     varying float vDistance;
     varying float vStatus;
@@ -107,15 +111,26 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
         }
       } else {
         vec3 c = statusColor(vStatus);
+        bool isOk = vStatus < 0.5;
+        // Healthy blocks are most of the wall: keep them a little calmer so alarms stand out.
+        float intensity = isOk ? 0.85 : 1.0;
+        vec3 tint = isOk ? mix(c, vec3(dot(c, vec3(0.3333))), 0.12) : c;
         if (isTop) {
-          finalColor = c;
-          finalColor += c * edge * 0.55;
+          // Lit centre falling off toward the edges, then a pale rim so the top reads as a real face.
+          float radial = smoothstep(0.0, 1.0, length(vUv - 0.5) * 1.6);
+          float shade = mix(1.1, 0.84, radial);
+          finalColor = tint * shade * intensity;
+          finalColor += mix(tint, vec3(1.0), 0.55) * edge * 0.5 * intensity;
         } else {
-          // Sides darken toward the base so raised blocks read as solid pillars.
-          float side = mix(0.22, 0.8, vRelativeY);
-          finalColor = mix(uBaseColor2, c, side);
-          float rim = smoothstep(0.06, 0.0, 1.0 - vRelativeY);
-          finalColor += c * rim * 0.5;
+          // Fixed key light in view space so the sides always show volume, whatever the platter angle.
+          vec3 lightDir = normalize(vec3(-0.45, 0.35, 0.82));
+          float faceLight = 0.5 + 0.5 * max(0.0, dot(normalize(vViewNormal), lightDir));
+          float vertical = mix(0.45, 1.0, smoothstep(0.0, 1.0, vRelativeY));
+          vec3 side = tint * faceLight * vertical * intensity;
+          // Sink the base into the ground colour so the block sits in the platter instead of floating on it.
+          side = mix(uBaseColor2, side, smoothstep(0.0, 0.16, vRelativeY));
+          float rim = smoothstep(0.05, 0.0, 1.0 - vRelativeY);
+          finalColor = side + mix(tint, vec3(1.0), 0.4) * rim * 0.45 * intensity;
         }
         finalColor = mix(finalColor, vec3(1.0), vHover * 0.28);
       }
