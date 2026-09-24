@@ -69,11 +69,16 @@ export const PARKING_SEVERITY_LEVEL: Record<ParkingSeverity, number> = {
 
 /**
  * Block heights (ground level is the top of the 1-unit ground cells).
- * Every problem lot shares one alarm height; healthy lots are a low block at half that height.
+ * The healthy block sets the unit; every severity is a whole multiple of it.
  */
 export const PARKING_GROUND_HEIGHT = 1;
-export const PARKING_ALARM_HEIGHT = 7;
-export const PARKING_OK_HEIGHT = PARKING_ALARM_HEIGHT / 2;
+export const PARKING_OK_HEIGHT = 3.5;
+export const PARKING_HEIGHT_MULTIPLIER: Record<ParkingSeverity, number> = {
+  ok: 1,
+  warning: 2,
+  major: 3,
+  critical: 4,
+};
 /** Gap between the top of a block and its beacon label. */
 export const PARKING_BEACON_GAP = 3.2;
 
@@ -204,7 +209,7 @@ export function summarizeParkingLots(lots: ParkingLot[]): Record<ParkingSeverity
 }
 
 export function parkingLotTargetHeight(severity: ParkingSeverity): number {
-  return severity === 'ok' ? PARKING_OK_HEIGHT : PARKING_ALARM_HEIGHT;
+  return PARKING_OK_HEIGHT * PARKING_HEIGHT_MULTIPLIER[severity];
 }
 
 /**

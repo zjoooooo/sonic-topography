@@ -5,14 +5,14 @@ Every parking lot becomes one block on the 3D platter:
 
 | State | Height | Colour |
 | --- | --- | --- |
-| No problem | low block, half the alarm height | cyan `#22d3ee` |
-| Warning | alarm height | yellow `#facc15` |
-| Major | alarm height | orange `#fb923c` |
-| Critical | alarm height | red `#ef4444` |
+| No problem | 1x (the unit) | cyan `#22d3ee` |
+| Warning | 2x | yellow `#facc15` |
+| Major | 3x | orange `#fb923c` |
+| Critical | 4x | red `#ef4444` |
 
-All problem blocks rise to exactly the same alarm height; only the colour tells the severity apart.
-Healthy lots are a low block at exactly half that height, so the wall has two clean levels.
-The ground stays flat (no idle wave animation) so the blocks are the only relief.
+The healthy block sets the unit height and every severity is a whole multiple of it, so height and
+colour tell the same story. The ground stays flat (no idle wave animation) so the blocks are the
+only relief.
 
 Blocks are drawn flat and bright: a solid top face with a light rim, sides that darken toward the
 ground. To try another palette, swap the four hex values in `PARKING_SEVERITY_COLORS`
@@ -116,5 +116,5 @@ If a poll fails, the last good list stays on screen and the error is shown in th
 | `src/App.tsx` | switches to `ParkingMonitorView` when the URL enables monitor mode |
 
 Tunable constants live at the top of `src/lib/parkingMonitor.ts`:
-`PARKING_ALARM_HEIGHT` (problem block height; healthy blocks are half of it), `PARKING_BEACON_GAP` (label distance
+`PARKING_OK_HEIGHT` (the unit height) and `PARKING_HEIGHT_MULTIPLIER` (per-severity multiples), `PARKING_BEACON_GAP` (label distance
 above the block), `DEFAULT_PARKING_LOT_SIZE` / `DEFAULT_PARKING_LOT_GAP` (block footprint and spacing).
