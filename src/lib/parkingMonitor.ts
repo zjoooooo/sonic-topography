@@ -52,16 +52,14 @@ export const PARKING_SEVERITIES: ParkingSeverity[] = ['ok', 'warning', 'major', 
 
 /**
  * Colours are plain sRGB hex so CSS and the block shader show the same tone.
- * The block shader keeps the body dark and puts the colour into the lit top and the edges,
- * so the palette can stay fairly saturated without looking like plastic bricks.
- * Healthy is a calm teal (most of the wall); alarms climb a warm ramp amber -> coral -> crimson.
- * Alternative palettes are listed in Project.md.
+ * The wall is a deep-blue field: healthy blocks are a quiet steel blue below the bloom threshold,
+ * and alarms climb a warm, glowing ramp gold -> coral -> hot red. Alternatives are listed in Project.md.
  */
 export const PARKING_SEVERITY_COLORS: Record<ParkingSeverity, string> = {
-  ok: '#2fb39a',
-  warning: '#f2b134',
-  major: '#f26b3a',
-  critical: '#e0304f',
+  ok: '#2b74d8',
+  warning: '#ffc857',
+  major: '#ff7a45',
+  critical: '#ff3355',
 };
 
 export const PARKING_SEVERITY_LEVEL: Record<ParkingSeverity, number> = {

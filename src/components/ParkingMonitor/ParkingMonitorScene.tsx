@@ -3,6 +3,7 @@ import { Html, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { MonitorBlockShaderMaterial, type MonitorBlockShaderMaterialInstance } from './MonitorBlockShaderMaterial';
+import { MonitorPostFX } from './MonitorPostFX';
 import { themes, type ThemeColors } from '../../lib/themes';
 import { DEFAULT_TERRAIN_DENSITY, deriveTerrainGridSettings } from '../../lib/groundEqSettings';
 import { DEFAULT_CAMERA_STATE, normalizeCameraState } from '../../lib/sceneDefaults';
@@ -387,6 +388,8 @@ export function ParkingMonitorScene({
 
   return (
     <>
+      {/* The post-processing chain needs an opaque canvas; clearing to the fog colour matches the CSS backdrop. */}
+      <MonitorPostFX getClearColor={() => groundMatRef.current?.uFogColor ?? null} />
       <OrbitControls
         ref={controlsRef}
         makeDefault

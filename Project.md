@@ -5,34 +5,31 @@ Every parking lot becomes one block on the 3D platter:
 
 | State | Height | Colour |
 | --- | --- | --- |
-| No problem | low block, half the alarm height | calm teal `#2fb39a` |
-| Warning | alarm height | amber `#f2b134` |
-| Major | alarm height | coral `#f26b3a` |
-| Critical | alarm height | crimson `#e0304f` |
+| No problem | low block, half the alarm height | steel blue `#2b74d8`, kept dim |
+| Warning | alarm height | gold `#ffc857`, glowing |
+| Major | alarm height | coral `#ff7a45`, glowing |
+| Critical | alarm height | hot red `#ff3355`, glowing and slowly pulsing |
 
 All problem blocks rise to exactly the same alarm height; only the colour tells the severity apart.
 Healthy lots are a low block at exactly half that height, so the wall has two clean levels.
 The ground stays flat (no idle wave animation) so the blocks are the only relief.
 
-Blocks are shaded as dark glass: the body is the platter colour tinted 20% by the status colour,
-and the colour itself lives in the lit top face, the top rim and the vertical edges (the same idea
-as the music terrain's glowing pillars). Healthy blocks render slightly dimmer than alarm blocks.
+### How the look is built
 
-### Alternative palettes
+The monitor renders through a small post-processing chain (`MonitorPostFX.tsx`: scene -> bloom ->
+sRGB output), so light is the thing that separates healthy from alarmed:
 
-Swap the four hex values in `PARKING_SEVERITY_COLORS` (`src/lib/parkingMonitor.ts`); the legend,
-beacons and detail card follow automatically.
+- Blocks are dark glass: the body is the platter colour tinted by the status colour, and the colour
+  itself lives in the lit top face, the top rim and the vertical edges.
+- Healthy blocks are rendered at 60% intensity, which keeps them under the bloom threshold: a calm
+  blue field that never glows.
+- Alarm blocks sit above the threshold and bloom. Coral and red are darker hues than gold, so they
+  get an HDR boost so all three glow about equally. Critical blocks breathe (a slow brightness pulse).
+- Bloom strength / radius / threshold live in `MONITOR_BLOOM` in `MonitorPostFX.tsx`.
 
-| Palette | ok | warning | major | critical | Character |
-| --- | --- | --- | --- | --- | --- |
-| Teal glow (default) | `#2fb39a` | `#f2b134` | `#f26b3a` | `#e0304f` | keeps a green-ish "healthy" cue, warm alarm ramp |
-| Slate control room | `#5b7fa6` | `#ffd166` | `#ff8a3d` | `#ff3b5c` | neutral blue-grey field, alarms pop hardest |
-| Muted earth | `#6fa87a` | `#d4a83a` | `#d3703c` | `#c2413f` | softest, lowest contrast between states |
-
-Hovering a block shows a beacon above it: a thin stem, a dot, and a label with the lot name
-floating a fixed distance above the block top. The label is a button; clicking it opens the
-detail card in the top-right corner. Clicking the block itself pins its beacon (useful on touch
-screens); `Esc` or clicking empty space unpins it.
+To try another palette, swap the four hex values in `PARKING_SEVERITY_COLORS`
+(`src/lib/parkingMonitor.ts`); the legend, beacons and detail card follow automatically. Keep the
+`ok` colour fairly dark so it stays below the bloom threshold, and keep the alarm colours bright.
 
 ## Opening the monitor
 
