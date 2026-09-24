@@ -50,12 +50,18 @@ export interface ParkingMonitorConfig {
 
 export const PARKING_SEVERITIES: ParkingSeverity[] = ['ok', 'warning', 'major', 'critical'];
 
-/** Colours are plain sRGB hex so CSS and the block shader show the same tone. */
+/**
+ * Colours are plain sRGB hex so CSS and the block shader show the same tone.
+ * The block shader keeps the body dark and puts the colour into the lit top and the edges,
+ * so the palette can stay fairly saturated without looking like plastic bricks.
+ * Healthy is a calm teal (most of the wall); alarms climb a warm ramp amber -> coral -> crimson.
+ * Alternative palettes are listed in Project.md.
+ */
 export const PARKING_SEVERITY_COLORS: Record<ParkingSeverity, string> = {
-  ok: '#52c95b',
-  warning: '#ffd43b',
-  major: '#ff8c2e',
-  critical: '#ff3c41',
+  ok: '#2fb39a',
+  warning: '#f2b134',
+  major: '#f26b3a',
+  critical: '#e0304f',
 };
 
 export const PARKING_SEVERITY_LEVEL: Record<ParkingSeverity, number> = {

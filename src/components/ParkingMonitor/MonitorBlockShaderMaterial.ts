@@ -114,23 +114,27 @@ export const MonitorBlockShaderMaterial = shaderMaterial(
         bool isOk = vStatus < 0.5;
         // Healthy blocks are most of the wall: keep them a little calmer so alarms stand out.
         float intensity = isOk ? 0.85 : 1.0;
-        vec3 tint = isOk ? mix(c, vec3(dot(c, vec3(0.3333))), 0.12) : c;
+        // Dark glass body tinted by the status colour; the colour itself lives in the lit top and the edges.
+        vec3 body = mix(uBaseColor2, c, 0.2);
         if (isTop) {
-          // Lit centre falling off toward the edges, then a pale rim so the top reads as a real face.
+          // Lit centre falling off toward a darker margin, then a bright rim so the top reads as a glowing face.
           float radial = smoothstep(0.0, 1.0, length(vUv - 0.5) * 1.6);
-          float shade = mix(1.1, 0.84, radial);
-          finalColor = tint * shade * intensity;
-          finalColor += mix(tint, vec3(1.0), 0.55) * edge * 0.5 * intensity;
+          vec3 face = mix(c, mix(c, body, 0.45), radial);
+          finalColor = face * intensity;
+          finalColor += mix(c, vec3(1.0), 0.45) * edge * 0.7 * intensity;
         } else {
           // Fixed key light in view space so the sides always show volume, whatever the platter angle.
           vec3 lightDir = normalize(vec3(-0.45, 0.35, 0.82));
-          float faceLight = 0.5 + 0.5 * max(0.0, dot(normalize(vViewNormal), lightDir));
-          float vertical = mix(0.45, 1.0, smoothstep(0.0, 1.0, vRelativeY));
-          vec3 side = tint * faceLight * vertical * intensity;
+          float faceLight = 0.6 + 0.4 * max(0.0, dot(normalize(vViewNormal), lightDir));
+          float vertical = mix(0.5, 1.0, smoothstep(0.0, 1.0, vRelativeY));
+          vec3 side = body * faceLight * vertical;
+          // Status colour returns as glowing vertical edges and a top rim, like the terrain pillars.
+          float verticalEdge = smoothstep(0.06, 0.0, vUv.x) + smoothstep(0.94, 1.0, vUv.x);
+          float rim = smoothstep(0.06, 0.0, 1.0 - vRelativeY);
+          side += c * (verticalEdge * 0.35 + rim * 0.7) * intensity;
           // Sink the base into the ground colour so the block sits in the platter instead of floating on it.
-          side = mix(uBaseColor2, side, smoothstep(0.0, 0.16, vRelativeY));
-          float rim = smoothstep(0.05, 0.0, 1.0 - vRelativeY);
-          finalColor = side + mix(tint, vec3(1.0), 0.4) * rim * 0.45 * intensity;
+          side = mix(uBaseColor2, side, smoothstep(0.0, 0.12, vRelativeY));
+          finalColor = side;
         }
         finalColor = mix(finalColor, vec3(1.0), vHover * 0.28);
       }

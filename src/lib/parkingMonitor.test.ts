@@ -39,10 +39,10 @@ assert.equal(normalizeParkingSeverity(false), 'critical');
 assert.equal(normalizeParkingSeverity('something-new'), 'warning');
 
 assert.deepEqual(PARKING_SEVERITIES, ['ok', 'warning', 'major', 'critical']);
-assert.equal(PARKING_SEVERITY_COLORS.ok, '#52c95b');
-assert.equal(PARKING_SEVERITY_COLORS.warning, '#ffd43b');
-assert.equal(PARKING_SEVERITY_COLORS.major, '#ff8c2e');
-assert.equal(PARKING_SEVERITY_COLORS.critical, '#ff3c41');
+assert.equal(PARKING_SEVERITY_COLORS.ok, '#2fb39a');
+assert.equal(PARKING_SEVERITY_COLORS.warning, '#f2b134');
+assert.equal(PARKING_SEVERITY_COLORS.major, '#f26b3a');
+assert.equal(PARKING_SEVERITY_COLORS.critical, '#e0304f');
 
 // --- heights: healthy is a low block at half the alarm height, every problem shares one alarm height ---
 assert.equal(PARKING_OK_HEIGHT, PARKING_ALARM_HEIGHT / 2);

@@ -5,14 +5,29 @@ Every parking lot becomes one block on the 3D platter:
 
 | State | Height | Colour |
 | --- | --- | --- |
-| No problem | low block, half the alarm height | grass green `#52c95b` |
-| Warning | alarm height | yellow `#ffd43b` |
-| Major | alarm height | orange `#ff8c2e` |
-| Critical | alarm height | red `#ff3c41` |
+| No problem | low block, half the alarm height | calm teal `#2fb39a` |
+| Warning | alarm height | amber `#f2b134` |
+| Major | alarm height | coral `#f26b3a` |
+| Critical | alarm height | crimson `#e0304f` |
 
 All problem blocks rise to exactly the same alarm height; only the colour tells the severity apart.
-Healthy lots are a low green block at exactly half that height, so the wall has two clean levels.
+Healthy lots are a low block at exactly half that height, so the wall has two clean levels.
 The ground stays flat (no idle wave animation) so the blocks are the only relief.
+
+Blocks are shaded as dark glass: the body is the platter colour tinted 20% by the status colour,
+and the colour itself lives in the lit top face, the top rim and the vertical edges (the same idea
+as the music terrain's glowing pillars). Healthy blocks render slightly dimmer than alarm blocks.
+
+### Alternative palettes
+
+Swap the four hex values in `PARKING_SEVERITY_COLORS` (`src/lib/parkingMonitor.ts`); the legend,
+beacons and detail card follow automatically.
+
+| Palette | ok | warning | major | critical | Character |
+| --- | --- | --- | --- | --- | --- |
+| Teal glow (default) | `#2fb39a` | `#f2b134` | `#f26b3a` | `#e0304f` | keeps a green-ish "healthy" cue, warm alarm ramp |
+| Slate control room | `#5b7fa6` | `#ffd166` | `#ff8a3d` | `#ff3b5c` | neutral blue-grey field, alarms pop hardest |
+| Muted earth | `#6fa87a` | `#d4a83a` | `#d3703c` | `#c2413f` | softest, lowest contrast between states |
 
 Hovering a block shows a beacon above it: a thin stem, a dot, and a label with the lot name
 floating a fixed distance above the block top. The label is a button; clicking it opens the
